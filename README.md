@@ -1,79 +1,56 @@
-<h1 align="center">WittyDisc</h1>
+# WittyDisc
 
-<p align="center">
-  <b>Reads DVD and Blu-ray disc images without mounting them.</b><br>
-  Every file in an <code>.iso</code> or <code>.img</code>, as byte ranges a player can read or hand straight to a decoder.
-</p>
+Reads DVD and Blu-ray disc images without mounting them. You don't install or open it yourself: WittyDVD and WittyBluray are built on it, and developers can use it as a Go library.
 
-<p align="center">
-  <a href="LICENSE"><img alt="Licence: Apache-2.0" src="https://img.shields.io/badge/licence-Apache--2.0-blue.svg"></a>
-  <img alt="Go 1.26+" src="https://img.shields.io/badge/Go-1.26%2B-00ADD8.svg">
-  <img alt="No dependencies" src="https://img.shields.io/badge/dependencies-none-success.svg">
-</p>
-
-> WittyDisc is developed and released here. Issues and pull requests are welcome.
-
-WittyDisc is the reader under [WittyDVD](https://github.com/wittywilla/WittyDVD) and
-[WittyBluray](https://github.com/wittywilla/WittyBluray), the disc engines of
-[WittyMediaServer](https://github.com/wittywilla/WittyMediaServer).
-
-## What it reads
+## What it does
 
 | Format | Used by | Details |
 |---|---|---|
-| **UDF 1.02** | DVD-Video | the file system DVD players read |
-| **UDF 2.50** | Blu-ray | metadata partitions (where Blu-ray keeps its folders), extended file entries, chained allocation descriptors for files over a gigabyte, and the mirror copy of the metadata when the main one can't be read |
-| **ISO 9660** | DVD “bridge” discs | a fallback, including multi-extent files over 4 GiB |
+| UDF 1.02 | DVD-Video | The file system DVD players read |
+| UDF 2.50 | Blu-ray | Metadata partitions, extended file entries, chained allocation descriptors for large files, and the mirror copy of the metadata when the main one can't be read |
+| ISO 9660 | DVD bridge discs | A fallback, including multi-extent files over 4 GiB |
 
-- **Files as extents:** each file's size and the byte ranges it occupies, so a 20 GB stream is read
-  in place, or passed to FFmpeg's `subfile` protocol, never copied.
-- **Safe with damaged images:** sizes and depths are bounded, descriptor chains are limited, and
-  nothing is trusted to be where it claims.
+- **Files as byte ranges:** each file's size and the ranges it occupies, so a very large stream is read in place, or handed to FFmpeg, and never copied.
+- **Safe with damaged images:** sizes and depths are bounded, descriptor chains are limited, and nothing is trusted to be where it claims.
+- It decrypts nothing, and no media comes with it.
 
-## Use
+The `session` package is the contract between a player and a disc engine's module: what to show, which bytes to decode and where the buttons are.
+
+## How to get it
+
+There's nothing to add. It reaches a server inside [WittyDVD](https://github.com/wittywilla/WittyDVD) and [WittyBluray](https://github.com/wittywilla/WittyBluray), which you add from the module store inside WittyMediaServer: **Settings → Modules**. That needs WittyMediaServer 0.6.0-alpha or later, and nothing older works.
+
+For a Go program:
 
 ```bash
-go get github.com/wittywilla/wittydisc@latest
+go get github.com/wittywilla/wittydisc
 ```
 
-```go
-import "github.com/wittywilla/wittydisc/isofs"
+## What it needs
 
-d, err := isofs.Open("MY_DISC.ISO")
-if err != nil { return err }
-defer d.Close()
+Go 1.26 or newer. It uses no cgo and nothing beyond Go's standard library.
 
-fmt.Println(d.Format, d.Label)                    // "udf" or "iso9660", and the volume label
-for _, f := range d.Files() {                     // every file with its size and extents
-    fmt.Println(f.Path, f.Size, f.Extents)
-}
-b, err := d.ReadFile("BDMV/index.bdmv", 1<<20)    // a whole file, size-capped
-f, ok := d.Find("VIDEO_TS/VTS_01_0.IFO")          // case-insensitive lookup
-r := d.Reader(f)                                  // an io.ReaderAt over the file
+## Platforms
+
+It's plain Go, and CI builds it for Windows, macOS, Linux and FreeBSD. Its tests have been run on Linux. It has not been run on a real Mac, or on FreeBSD, where it has only been cross-compiled.
+
+## Building and testing
+
+```bash
+go vet ./...
+go test ./... -count=1
 ```
 
-| Call | Does |
+| Call in `isofs` | Does |
 |---|---|
-| `Open(path)` | opens an image (UDF first, then ISO 9660) |
-| `Files()`, `Find(path)` | every file, or one by path, case-insensitively |
-| `ReadFile(path, max)` | a whole file, with a size cap |
-| `Reader(file)` | an `io.ReaderAt` over a file's extents |
-
-No cgo and no dependencies beyond the standard library. Go 1.26 or newer.
-
-## The Witty family
-
-| Project | Role |
-|---|---|
-| [WittyMediaServer](https://github.com/wittywilla/WittyMediaServer) | the media server these engines power |
-| [WittyDVD](https://github.com/wittywilla/WittyDVD) · [WittyBluray](https://github.com/wittywilla/WittyBluray) | the DVD and Blu-ray engines |
-| **WittyDisc** | disc image reader |
+| `Open(path)` | Opens an image: UDF first, then ISO 9660 |
+| `Files()`, `Find(path)` | Every file, or one by path, ignoring case |
+| `ReadFile(path, max)` | A whole file, with a size cap |
+| `Reader(file)` | An `io.ReaderAt` over a file's ranges |
 
 ## Licence
 
-**Apache-2.0**, the same licence as WittyMediaServer. © 2026 WittyWilla and contributors.
-Use, change and share it; if you redistribute it or build on it, keep the [NOTICE](NOTICE)
-attribution, *“WittyDisc, developed by WittyWilla”*, in your NOTICE file, documentation or About screen.
+Apache-2.0: see [LICENSE](LICENSE) and [NOTICE](NOTICE). If you redistribute it or build on it, keep the NOTICE attribution.
 
 ## Legal
 
