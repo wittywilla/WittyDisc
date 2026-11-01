@@ -11,8 +11,7 @@
   <img alt="No dependencies" src="https://img.shields.io/badge/dependencies-none-success.svg">
 </p>
 
-> Read-only mirror of `modules/wittydisc` in [WittyMediaServer](https://github.com/wittywilla/WittyMediaServer),
-> where development happens. Please open issues and pull requests there.
+> WittyDisc is developed and released here. Issues and pull requests are welcome.
 
 WittyDisc is the reader under [WittyDVD](https://github.com/wittywilla/WittyDVD) and
 [WittyBluray](https://github.com/wittywilla/WittyBluray), the disc engines of
