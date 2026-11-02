@@ -2,6 +2,18 @@
 
 Reads DVD and Blu-ray disc images without mounting them. You don't install or open it yourself: WittyDVD and WittyBluray are built on it, and developers can use it as a Go library.
 
+<!-- pictures -->
+
+![A DVD menu, read from a disc image without mounting it](docs/images/dvd-menu.webp)
+
+<sub>WittyDVD showing a menu that WittyDisc read from the image. [Sintel](https://durian.blender.org/), Blender Foundation, [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/).</sub>
+
+![A shelf of disc images](docs/images/discs.webp)
+
+<sub>Disc images on a shelf in WittyMediaServer. From a test server. The server's [credits list](https://github.com/wittywilla/WittyMediaServer/blob/master/docs/images/CREDITS.md) names everything shown.</sub>
+
+<!-- /pictures -->
+
 ## What it does
 
 | Format | Used by | Details |
