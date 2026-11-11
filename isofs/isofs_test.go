@@ -174,6 +174,100 @@ func TestUDFHugeDescriptorLengths(t *testing.T) {
 	}
 }
 
+// udfFID is one file identifier of a directory: a name and where its entry is.
+func udfFID(name string, block uint32, dir bool) []byte {
+	b := make([]byte, 38+1+len(name))
+	binary.LittleEndian.PutUint16(b, 257)
+	if dir {
+		b[18] = 2
+	}
+	b[19] = byte(1 + len(name))
+	binary.LittleEndian.PutUint32(b[20:], Sector)
+	binary.LittleEndian.PutUint32(b[24:], block)
+	b[38] = 8 // 8-bit characters
+	copy(b[39:], name)
+	for len(b)%4 != 0 {
+		b = append(b, 0)
+	}
+	return b
+}
+
+// udfEmbedded writes a file entry that keeps its content inside itself, after
+// attrs bytes of extended attributes. tag is 261 for a file entry and 266 for
+// an extended one, whose fixed part is longer.
+func udfEmbedded(b []byte, tag uint16, fileType byte, attrs int, content []byte) {
+	fixed := 176
+	if tag == 266 {
+		fixed = 216
+	}
+	binary.LittleEndian.PutUint16(b, tag)
+	b[16+11] = fileType
+	binary.LittleEndian.PutUint16(b[16+18:], 3) // the content is in the entry
+	binary.LittleEndian.PutUint64(b[56:], uint64(len(content)))
+	binary.LittleEndian.PutUint32(b[fixed-8:], uint32(attrs))
+	binary.LittleEndian.PutUint32(b[fixed-4:], uint32(len(content)))
+	for i := 0; i < attrs; i++ {
+		b[fixed+i] = 0xEE // never part of the file
+	}
+	copy(b[fixed+attrs:], content)
+}
+
+// A small file that UDF keeps inside its file entry is read from where the entry
+// holds it: after the fixed part and the extended attributes, not at the end of
+// the entry's block.
+func TestUDFEmbeddedFile(t *testing.T) {
+	plain := []byte("kept in a file entry")
+	extended := []byte("kept in an extended file entry, after its attributes")
+	var img []byte
+	img = udfImage(func(b []byte) {
+		dir := append(udfFID("PLAIN.TXT", 5, false), udfFID("EXT.TXT", 6, false)...)
+		dir = append(dir, udfFID("EMPTY.TXT", 7, false)...)
+		udfEmbedded(b, 261, 4, 0, dir)
+	})
+	udfEmbedded(img[305*Sector:], 261, 5, 0, plain)
+	udfEmbedded(img[306*Sector:], 266, 5, 24, extended)
+	udfEmbedded(img[307*Sector:], 261, 5, 8, nil)
+	d, err := openBytes(t, img)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for name, want := range map[string][]byte{"PLAIN.TXT": plain, "EXT.TXT": extended, "EMPTY.TXT": {}} {
+		got, err := d.ReadFile(name, 0)
+		if err != nil || !bytes.Equal(got, want) {
+			t.Errorf("%s: read %q (%v), want %q", name, got, err, want)
+		}
+		f, ok := d.Find(name)
+		if !ok || f.Size != int64(len(want)) {
+			t.Errorf("%s: found %v with size %+v, want %d bytes", name, ok, f, len(want))
+		}
+	}
+	// What says where the bytes are must agree with reading them: a server hands
+	// these extents to another program.
+	f, _ := d.Find("EXT.TXT")
+	if len(f.Extents) != 1 || f.Extents[0].Offset != 306*Sector+216+24 || f.Extents[0].Length != int64(len(extended)) {
+		t.Errorf("EXT.TXT lies at %+v", f.Extents)
+	}
+	part := make([]byte, 8)
+	if n, err := d.ReadAtFile(f, part, 8); n != 8 || err != nil || !bytes.Equal(part, extended[8:16]) {
+		t.Errorf("reading from the middle: %q (%d, %v)", part[:n], n, err)
+	}
+}
+
+// An entry that claims more content than it holds gives only what it holds.
+func TestUDFEmbeddedFileClaimingMore(t *testing.T) {
+	content := []byte("short")
+	img := udfImage(func(b []byte) { udfEmbedded(b, 261, 4, 0, udfFID("LIES.TXT", 5, false)) })
+	udfEmbedded(img[305*Sector:], 261, 5, 0, content)
+	binary.LittleEndian.PutUint64(img[305*Sector+56:], 1<<40)
+	d, err := openBytes(t, img)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got, err := d.ReadFile("LIES.TXT", 0); err != nil || !bytes.Equal(got, content) {
+		t.Errorf("read %q (%v), want %q", got, err, content)
+	}
+}
+
 // Disc images come from anywhere, and no image may crash or hang the server.
 // `go test -fuzz=FuzzOpen` explores further; the seeds run with every test.
 func FuzzOpen(f *testing.F) {

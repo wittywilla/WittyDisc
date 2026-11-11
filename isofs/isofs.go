@@ -606,6 +606,9 @@ type udfEntry struct {
 	size    int64
 	extents []Extent
 	inline  []byte // data embedded in the ICB (allocation type 3)
+	// inlineAt is where that data starts in the entry's own block: after the
+	// entry's fixed part and its extended attributes.
+	inlineAt int64
 }
 
 func (d *Disc) readUDFEntry(ctx *udfCtx, icb longAD) (*udfEntry, error) {
@@ -657,6 +660,7 @@ func (d *Disc) readUDFEntry(ctx *udfCtx, icb longAD) (*udfEntry, error) {
 		}
 	case 3: // embedded
 		e.inline = append([]byte(nil), ads...)
+		e.inlineAt = adStart
 	default:
 		return nil, errors.New("UDF: extended allocation descriptors unsupported")
 	}
@@ -731,9 +735,18 @@ func (d *Disc) walkUDFDir(ctx *udfCtx, icb longAD, prefix string, depth int) err
 		}
 		f := &File{Path: full, Size: fe.size, Extents: fe.extents}
 		if fe.inline != nil {
-			// Tiny embedded file: expose it via a synthetic extent at the ICB.
-			sec, _ := ctx.abs(fidICB.part, fidICB.block)
-			f.Extents = []Extent{{Offset: sec*Sector + int64(Sector-len(fe.inline)), Length: int64(len(fe.inline))}}
+			// A small file kept inside its own file entry: its bytes follow the
+			// entry's fixed part and extended attributes, in the entry's block.
+			// The entry holds what is there, whatever length it claims.
+			sec, err := ctx.abs(fidICB.part, fidICB.block)
+			if err != nil {
+				continue
+			}
+			f.Size = min(max(fe.size, 0), int64(len(fe.inline)))
+			f.Extents = nil
+			if f.Size > 0 {
+				f.Extents = []Extent{{Offset: sec*Sector + fe.inlineAt, Length: f.Size}}
+			}
 		}
 		d.add(f)
 	}
