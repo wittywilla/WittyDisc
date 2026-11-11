@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (C) 2026 WittyWilla and contributors
+
 // Package session is the contract between a player and a disc engine's module: what
 // a player should show right now, which bytes to decode, what to draw over them and
 // where the buttons are. WittyDVD and WittyBluray each implement it in their own

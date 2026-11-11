@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (C) 2026 WittyWilla and contributors
+
 // Package isofs reads files out of optical disc images (ISO 9660 and UDF)
 // without mounting them. It is WittyDisc, shared by WittyDVD and WittyBluray. DVD-Video discs are UDF/ISO 9660 "bridge" discs, so
 // UDF is tried first and ISO 9660 is the fallback.
