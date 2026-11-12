@@ -20,9 +20,10 @@ Reads DVD and Blu-ray disc images without mounting them. You don't install or op
 |---|---|---|
 | UDF 1.02 | DVD-Video | The file system DVD players read |
 | UDF 2.50 | Blu-ray | Metadata partitions, extended file entries, chained allocation descriptors for large files, and the mirror copy of the metadata when the main one can't be read |
+| UDF 1.50 to 2.60 | Burned and rewritable discs | Sparable partitions (through the sparing table), virtual partitions (through the allocation table at the end of the disc), extended allocation descriptors, and parts of files the disc doesn't record, which read as zeros |
 | ISO 9660 | DVD bridge discs | A fallback, including multi-extent files over 4 GiB |
 
-- **Files as byte ranges:** each file's size and the ranges it occupies, so a very large stream is read in place, or handed to FFmpeg, and never copied.
+- **Files as byte ranges:** each file's size and the ranges it occupies, so a very large stream is read in place, or handed to FFmpeg, and never copied. A range marked `Zero` (offset -1) is part of a file the disc doesn't record, and reads as zeros.
 - **Safe with damaged images:** sizes and depths are bounded, descriptor chains are limited, and nothing is trusted to be where it claims.
 - It decrypts nothing, and no media comes with it.
 

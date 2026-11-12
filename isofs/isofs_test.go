@@ -277,6 +277,13 @@ func FuzzOpen(f *testing.F) {
 		binary.LittleEndian.PutUint16(b, 266)
 		b[16+11] = 4
 	}), "")
+	f.Add(metadataDisc("metadata file entry"), "BDMV/INDEX.BDMV")
+	f.Add(sparableDisc("second"), "B")
+	f.Add(virtualDisc("2.00"), "VIDEO_TS/VIDEO_TS.IFO")
+	f.Add(physicalDisc(func(u *udfDisc) {
+		udfEntryOf(u.blk(10), 266, 5, 2, 5000, ead(0, 4096, 2048, 21, 0), ead(1, 904, 0, 23, 0), ead(3, Sector, 0, 11, 0))
+		aed(u.blk(11), ead(0, Sector, Sector, 20, 0))
+	}), "F")
 	f.Fuzz(func(t *testing.T, b []byte, name string) {
 		d, err := openBytes(t, b)
 		if err != nil {
