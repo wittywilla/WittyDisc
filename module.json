@@ -6,7 +6,7 @@
   "license": "AGPL-3.0-or-later",
   "delivery": "library",
   "api": 3,
-  "minServer": "0.6.0-alpha",
+  "minServer": "0.8.0-alpha",
   "maxServer": "0.8.x",
   "group": "system",
   "summary": "Reads DVD and Blu-ray images without mounting them. The disc modules are built on it.",
