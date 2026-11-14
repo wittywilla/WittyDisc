@@ -1,6 +1,6 @@
 # WittyDisc
 
-Reads DVD and Blu-ray disc images without mounting them. You don't install or open it yourself: WittyDVD and WittyBluray are built on it, and developers can use it as a Go library.
+Reads DVD and Blu-ray disc images without mounting them, and plays them in WittyMediaServer's web app. You don't install or open it yourself: WittyDVD and WittyBluray are built on it and bring it with them. Its web part (`web/`, built with WittyModule's `kit/web`) is the disc player they share in a browser, with Settings' DVDs and Blu-rays; developers can use the rest as a Go library.
 
 <!-- pictures -->
 

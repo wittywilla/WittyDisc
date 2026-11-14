@@ -1,0 +1,37 @@
+{
+  "format": "wittymodule-integration",
+  "formatVersion": 1,
+  "module": "wittydisc",
+  "host": {
+    "web": ">=5"
+  },
+  "web": {
+    "players": [
+      {
+        "mediaKind": "disc"
+      }
+    ],
+    "settings": [
+      {
+        "id": "discs",
+        "label": "DVDs and Blu-rays",
+        "admin": true,
+        "after": "playback",
+        "search": [
+          "disc",
+          "DVD",
+          "Blu-ray",
+          "region",
+          "languages",
+          "drive sounds",
+          "insert animation",
+          "parental",
+          "BD-J",
+          "Java",
+          "low power",
+          "libbluray"
+        ]
+      }
+    ]
+  }
+}

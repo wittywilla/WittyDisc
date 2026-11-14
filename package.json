@@ -1,0 +1,25 @@
+{
+  "name": "@wittywilla/wittydisc",
+  "version": "0.3.0",
+  "private": true,
+  "description": "The browser half of WittyDisc: the disc player WittyDVD and WittyBluray share in WittyMediaServer's web app.",
+  "license": "AGPL-3.0-or-later",
+  "author": "WittyWilla (https://github.com/wittywilla)",
+  "type": "module",
+  "main": "./web/index.ts",
+  "scripts": {
+    "build:bundle": "node ${WITTYMODULE:-../WittyModule}/kit/web/build-bundle.mjs .",
+    "test": "node scripts/test-web.mjs"
+  },
+  "repository": "github:wittywilla/WittyDisc",
+  "dependencies": {
+    "hls.js": "^1.7.4"
+  },
+  "devDependencies": {
+    "esbuild": "^0.27.7",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-router-dom": "^7.18.5",
+    "vite": "^8.3.5"
+  }
+}

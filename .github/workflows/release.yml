@@ -21,29 +21,121 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version: 22
+      - name: Install
+        run: if [ -f package-lock.json ]; then npm ci --ignore-scripts --no-audit --no-fund; else npm install --ignore-scripts --no-audit --no-fund; fi
+      - run: npm test --if-present
       - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7
         with:
           go-version: "1.27.x"
           check-latest: true
           cache: false
-      - name: The tag must match the version
-        run: |
-          want="$(sed -n 's/.*"version": *"\([^"]*\)".*/\1/p' module.json | head -1)"
-          [ "v$want" = "$GITHUB_REF_NAME" ] || { echo "module.json says $want, and the tag is $GITHUB_REF_NAME"; exit 1; }
-      - name: Test
+      - name: The library
         run: |
           if grep -q '^replace' go.mod; then echo "go.mod has replace directives, which go install refuses"; exit 1; fi
           go vet ./...
           go test ./... -count=1
 
+  # From a fresh checkout, running no tests.
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7
+        with:
+          go-version: "1.27.x"
+          check-latest: true
+          cache: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version: 22
+      - name: The tag must match the version
+        run: |
+          want="$(sed -n 's/.*"version": *"\([^"]*\)".*/\1/p' module.json | head -1)"
+          [ "v$want" = "$GITHUB_REF_NAME" ] || { echo "module.json says $want, and the tag is $GITHUB_REF_NAME"; exit 1; }
+      - name: Install
+        run: if [ -f package-lock.json ]; then npm ci --ignore-scripts --no-audit --no-fund; else npm install --ignore-scripts --no-audit --no-fund; fi
+      - name: Web part
+        run: |
+          git clone --depth 1 --branch v0.5.2 https://github.com/wittywilla/WittyModule "$RUNNER_TEMP/WittyModule"
+          WITTYMODULE="$RUNNER_TEMP/WittyModule" npm run build:bundle
+      - name: Pack the bundle and write the checksum list
+        run: go run github.com/wittywilla/wittymodule/cmd/wittymodule@v0.5.2 pack -web dist -out release .
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: release-files
+          path: release/*
+          if-no-files-found: error
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: sums
+          path: release/*-SHA256SUMS.txt
+          if-no-files-found: error
+
+  # The signing key is used here, on a clean machine that holds nothing of this
+  # repository: only the checksum list, and the signing tool at a released version.
+  # Every repository holds the same key, so the tool refuses a list naming anything
+  # but this module and this version, whatever the build offered.
+  sign:
+    needs: build
+    runs-on: ubuntu-latest
+    # With you as a required reviewer of this environment, nothing is signed until
+    # you approve it.
+    environment: release
+    permissions: {}
+    steps:
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7
+        with:
+          go-version: "1.27.x"
+          check-latest: true
+          cache: false
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
+        with:
+          name: sums
+          path: signed
+      - name: Sign the checksum list
+        env:
+          SIGNING_KEY: ${{ secrets.WMS_SIGNING_KEY }}
+        run: |
+          if [ -z "$SIGNING_KEY" ]; then
+            echo "::error::The secret WMS_SIGNING_KEY is missing, and an unsigned release can't be installed. Nothing was published. Add it to the release environment, then run this again."
+            exit 1
+          fi
+          key="$RUNNER_TEMP/module.key"
+          trap 'rm -f "$key"' EXIT
+          (umask 077; printf '%s\n' "$SIGNING_KEY" > "$key")
+          go run github.com/wittywilla/wittymodule/cmd/wittymodule@v0.5.2 sign -key "$key" -expect "wittydisc-${GITHUB_REF_NAME#v}" signed/*-SHA256SUMS.txt
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: signature
+          path: signed/*.sig
+          if-no-files-found: error
+
   # Publishing runs no project code at all.
   publish:
-    needs: test
+    needs: [build, sign]
     runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
+        with:
+          name: release-files
+          path: release
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
+        with:
+          name: signature
+          path: release
       - uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3
         with:
+          files: release/*
+          fail_on_unmatched_files: true
           prerelease: ${{ contains(github.ref_name, '-') }}
           generate_release_notes: true

@@ -1,0 +1,10 @@
+{
+  "format": "wittymodule-sdui",
+  "formatVersion": 1,
+  "module": "wittydisc",
+  "catalog": 8,
+  "theme": {
+    "scope": "wittydisc",
+    "label": "Discs"
+  }
+}
