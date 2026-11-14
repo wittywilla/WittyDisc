@@ -3,6 +3,10 @@
 What changed in WittyDisc, newest first. What changed before it had a repository of its own is in the
 [WittyMediaServer changelog](https://github.com/wittywilla/WittyMediaServer/blob/master/CHANGELOG.md).
 
+## 0.3.2
+
+- Signed with the module key: 0.3.1 was signed with another key, so no server could install it.
+
 ## 0.3.1
 
 - The first published release on module API 5, with the WittyModule 0.5.4 workflows. The tag v0.3.0 was made with workflows that couldn't build it and was never published.
