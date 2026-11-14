@@ -3,8 +3,9 @@
 What changed in WittyDisc, newest first. What changed before it had a repository of its own is in the
 [WittyMediaServer changelog](https://github.com/wittywilla/WittyMediaServer/blob/master/CHANGELOG.md).
 
-## Unreleased
+## 0.3.0
 
+- Built on WittyModule 0.5.4 and module API 5.
 - **WittyDisc 0.3.0: module API 5, with a web part.** The disc player WittyDVD and WittyBluray share in WittyMediaServer's web app is WittyDisc's: the player with the disc's own menus, its remote and another device steering it (`players: disc`), Settings' DVDs and Blu-rays (`settings: discs`, after Playback), and an administrator's Disc settings and "Name titles and scenes" in a title's menu. It is delivered as a web bundle (`index.js`), which WittyDVD and WittyBluray bring with them; the Go library still reaches a server inside them. The disc sessions it opens, their streams and the refusal of encrypted discs stay the server's, and so do the settings, which the server's sessions read. Its `sdui.json` carries only its theme scope: on every other app a disc plays in the app's own player.
 - **WittyDisc 0.2.1:** A small file that UDF keeps inside its file entry is read from where the entry holds it. It was read from the end of the entry's block, which gave the wrong bytes. It says it works with WittyMediaServer up to 0.8.x.
 - **WittyDisc 0.2.1:** Discs that were burned or rewritten read too. A rewritable disc's sparable partition is read through its sparing table, and an incrementally written disc's virtual partition through the allocation table at its end; a disc that lacks one is refused with a reason rather than read wrongly. Extended allocation descriptors are read, and so are file entries that a rewritable disc replaced with newer ones.
