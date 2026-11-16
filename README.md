@@ -1,6 +1,6 @@
 # WittyDisc
 
-Reads DVD and Blu-ray disc images without mounting them, and plays them in WittyMediaServer's web app. You don't install or open it yourself: WittyDVD and WittyBluray are built on it and bring it with them. Its web part (`web/`, built with WittyModule's `kit/web`) is the disc player they share in a browser, with Settings' DVDs and Blu-rays; developers can use the rest as a Go library.
+Reads DVD and Blu-ray disc images without mounting them, and plays them in [WittyMediaServer](https://github.com/wittywilla/WittyMediaServer)'s web app. You don't open it yourself: WittyDVD and WittyBluray are built on it. Its web part (`web/`, built with WittyModule's `kit/web`) is the disc player they share in a browser, with Settings' DVDs and Blu-rays; developers can use the rest as a Go library. WittyMediaServer's site is https://wittymediaserver.com.
 
 <!-- pictures -->
 
@@ -29,9 +29,15 @@ Reads DVD and Blu-ray disc images without mounting them, and plays them in Witty
 
 The `session` package is the contract between a player and a disc engine's module: what to show, which bytes to decode and where the buttons are.
 
+## How it fits
+
+WittyDisc is a module of WittyMediaServer, in two halves. The web part is a module of its own in the store (a `web` module, built for module API 5), and a core one: [WittyDVD](https://github.com/wittywilla/WittyDVD) and [WittyBluray](https://github.com/wittywilla/WittyBluray) name it in `requires`, so a server adds it before either of them, and as a core module it can't be taken off a server. The Go library reaches a server inside those two modules. The disc sessions the player opens, the streams and the refusal of encrypted discs stay with the server.
+
 ## How to get it
 
-There's nothing to add. It reaches a server inside [WittyDVD](https://github.com/wittywilla/WittyDVD) and [WittyBluray](https://github.com/wittywilla/WittyBluray), which you add from the module store inside WittyMediaServer: **Settings → Modules**. That needs WittyMediaServer 0.6.0-alpha or later, and nothing older works.
+There's nothing to add by hand. Add WittyDVD or WittyBluray from the module store inside WittyMediaServer, **Settings → Modules → Browse the store → Add**, and WittyDisc comes first.
+
+This version is for module API 5, on WittyMediaServer 0.8.0-alpha through 0.8.x (`minServer` and `maxServer` in [module.json](module.json)). A server takes module API 5 only, so nothing older works.
 
 For a Go program:
 
@@ -41,7 +47,7 @@ go get github.com/wittywilla/wittydisc
 
 ## What it needs
 
-Go 1.26 or newer. It uses no cgo and nothing beyond Go's standard library.
+Go 1.26 or newer. The Go library uses no cgo and nothing beyond Go's standard library. The web part needs Node.js and npm, and a checkout of [WittyModule](https://github.com/wittywilla/WittyModule) for its `kit/web` builder.
 
 ## Platforms
 
@@ -49,9 +55,20 @@ It's plain Go, and CI builds it for Windows, macOS, Linux and FreeBSD. Its tests
 
 ## Building and testing
 
+What CI runs, the Go half:
+
 ```bash
+go run github.com/wittywilla/wittymodule/cmd/wittymodule@v0.5.4 check .
 go vet ./...
 go test ./... -count=1
+```
+
+The web part, with a WittyModule checkout at `../WittyModule` (or `WITTYMODULE` set to one):
+
+```bash
+npm ci
+npm test
+npm run build:bundle
 ```
 
 | Call in `isofs` | Does |
