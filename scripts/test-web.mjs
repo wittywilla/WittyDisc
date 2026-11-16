@@ -6,7 +6,7 @@
 // register() with esbuild, with stand-ins for the app.
 import { existsSync, readFileSync, readdirSync, rmSync } from 'node:fs'
 import { join, resolve } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { fileURLToPath, pathToFileURL } from 'node:url'
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { build } from 'esbuild'
@@ -42,7 +42,7 @@ test('register() hands over what integration.json claims', async () => {
   } }
   await build({ entryPoints: [join(root, 'web/app/register.tsx')], outfile: out, bundle: true, format: 'esm', platform: 'node', jsx: 'automatic', logLevel: 'warning', plugins: [stub], external: ['react', 'react/jsx-runtime'] })
   try {
-    const { register } = await import(out)
+    const { register } = await import(pathToFileURL(out).href) // a file:// URL: Windows paths aren't one
     const r = register({})
     assert.deepEqual(Object.keys(r.players).sort(), integration.web.players.map((x) => x.mediaKind).sort())
     assert.deepEqual(Object.keys(r.settings).sort(), integration.web.settings.map((x) => x.id).sort())

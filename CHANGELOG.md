@@ -3,6 +3,10 @@
 What changed in WittyDisc, newest first. What changed before it had a repository of its own is in the
 [WittyMediaServer changelog](https://github.com/wittywilla/WittyMediaServer/blob/master/CHANGELOG.md).
 
+## 0.3.3
+
+- DVD menu: Resume and Play movie are normal-sized buttons in one row with Remote and the settings, as the host's player bar lays them out (they were stretched across two rows). The web test runs on Windows.
+
 ## 0.3.2
 
 - Signed with the module key: 0.3.1 was signed with another key, so no server could install it.
