@@ -809,18 +809,24 @@ export default function DvdPlayer({ item, mode, ttn, chapter, startAt, insert, m
           )}
           {pres?.kind !== 'title' && (
             <div className="bottom" onClick={(e) => e.stopPropagation()}>
+              {/* The host's player bar is a grid of three parts (left, middle, right): the hint on the
+                  left and the buttons on the right, each its own size, in one row. */}
               <div className="ctl">
-                <span className="muted hide-narrow" style={{ fontSize: 13 }}>{inMenu ? 'Arrows / mouse to choose · Enter to select' : menu?.buttonsFromSec ? 'Waiting for the menu…' : ''}</span>
-                <div className="spacer" />
-                <button className="btn sm" onClick={() => act({ type: 'resume' })}>Resume</button>
-                <button className="btn sm primary" onClick={() => act({ type: 'title', ttn: filmTitle(item) })}><IconPlay /> Play movie</button>
-                {!bdjOn && pres?.media?.type === 'hls' && !pres.media.loop && pres.media.stillSec !== 0 && <button className="btn sm ghost" onClick={() => act({ type: 'ended' })}>Skip</button>}
-                {!bdjOn && pres?.media?.type === 'hls' && (pres.media.loop || pres.media.stillSec === 0) && buttons.length === 0 && <button className="btn sm ghost" onClick={() => act({ type: 'ended' })}>Skip</button>}
-                {/* A picture held until the viewer acts, with nothing to press: a player's Play key goes on. */}
-                {pres?.media?.type === 'still' && pres.media.stillSec < 0 && buttons.length === 0 && <button className="btn sm ghost" onClick={() => act({ type: 'ended' })}>Continue</button>}
-                <button className={'btn sm remote-toggle' + (remoteOn ? ' primary' : '')} onClick={() => setRemote(!remoteOn)} aria-pressed={remoteOn} title="Show or hide the on-screen remote (r)"><IconRemote /> <span>Remote</span></button>
-                <button className="ibtn" onClick={() => setSettingsOpen((o) => !o)} title="Viewing settings"><IconSettings /></button>
-                <button className="ibtn" onClick={() => toggleFullscreen(root.current)} title="Fullscreen (f)">⛶</button>
+                <div className="ctl-left">
+                  <span className="muted hide-narrow" style={{ fontSize: 13 }}>{inMenu ? 'Arrows / mouse to choose · Enter to select' : menu?.buttonsFromSec ? 'Waiting for the menu…' : ''}</span>
+                </div>
+                <div className="ctl-mid" />
+                <div className="ctl-right">
+                  <button className="btn sm" onClick={() => act({ type: 'resume' })}>Resume</button>
+                  <button className="btn sm primary" onClick={() => act({ type: 'title', ttn: filmTitle(item) })}><IconPlay /> Play movie</button>
+                  {!bdjOn && pres?.media?.type === 'hls' && !pres.media.loop && pres.media.stillSec !== 0 && <button className="btn sm ghost" onClick={() => act({ type: 'ended' })}>Skip</button>}
+                  {!bdjOn && pres?.media?.type === 'hls' && (pres.media.loop || pres.media.stillSec === 0) && buttons.length === 0 && <button className="btn sm ghost" onClick={() => act({ type: 'ended' })}>Skip</button>}
+                  {/* A picture held until the viewer acts, with nothing to press: a player's Play key goes on. */}
+                  {pres?.media?.type === 'still' && pres.media.stillSec < 0 && buttons.length === 0 && <button className="btn sm ghost" onClick={() => act({ type: 'ended' })}>Continue</button>}
+                  <button className={'btn sm remote-toggle' + (remoteOn ? ' primary' : '')} onClick={() => setRemote(!remoteOn)} aria-pressed={remoteOn} title="Show or hide the on-screen remote (r)"><IconRemote /> <span>Remote</span></button>
+                  <button className="ibtn" onClick={() => setSettingsOpen((o) => !o)} title="Viewing settings"><IconSettings /></button>
+                  <button className="ibtn" onClick={() => toggleFullscreen(root.current)} title="Fullscreen (f)">⛶</button>
+                </div>
               </div>
             </div>
           )}
