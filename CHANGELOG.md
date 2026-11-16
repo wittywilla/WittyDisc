@@ -3,6 +3,10 @@
 What changed in WittyDisc, newest first. What changed before it had a repository of its own is in the
 [WittyMediaServer changelog](https://github.com/wittywilla/WittyMediaServer/blob/master/CHANGELOG.md).
 
+## 0.3.4
+
+- The README's pictures are retaken from WittyMediaServer 0.8.0-alpha.
+
 ## 0.3.3
 
 - DVD menu: Resume and Play movie are normal-sized buttons in one row with Remote and the settings, as the host's player bar lays them out (they were stretched across two rows). The web test runs on Windows.
