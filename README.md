@@ -82,15 +82,6 @@ npm run build:bundle
 
 GNU Affero General Public License v3.0 (or later): see [LICENSE](LICENSE) and [NOTICE](NOTICE). If you redistribute it or build on it, please keep the NOTICE attribution.
 
-## Legal
-
-WittyDisc is an independent open-source project. It isn't associated with, sponsored by or endorsed
-by the owners of the DVD or Blu-ray formats, any film studio or any other player project. It reads
-disc images you already have. It doesn't decrypt anything and no media comes with it: you're
-responsible for having the rights to what you open. Any third-party names here only describe what it
-works with, and belong to their owners. It's provided “as is”, with no warranty; see
-[LICENSE](LICENSE). Local law applies to how you use it. This isn't legal advice.
-
 <!-- module-kit -->
 ## Releasing
 
@@ -112,3 +103,12 @@ To take a version back, run the *withdraw* workflow from the *Actions* tab. It a
 
 Licensed under AGPL-3.0-or-later: see [LICENSE](LICENSE) and [NOTICE](NOTICE).
 <!-- /module-kit -->
+
+## Legal
+
+WittyDisc is an independent open-source project. It isn't associated with, sponsored by or endorsed
+by the owners of the DVD or Blu-ray formats, any film studio or any other player project. It reads
+disc images you already have. It doesn't decrypt anything and no media comes with it: you're
+responsible for having the rights to what you open. Any third-party names here only describe what it
+works with, and belong to their owners. It's provided “as is”, with no warranty; see
+[LICENSE](LICENSE). Local law applies to how you use it. This isn't legal advice.
