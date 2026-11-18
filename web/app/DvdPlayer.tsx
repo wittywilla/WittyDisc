@@ -20,6 +20,7 @@ import { announce } from '@wms/app/a11y'
 import { getTvMode } from '@wms/app/tvmode/mode'
 import { useDiscRemote } from './discTarget'
 import { discPath } from './paths'
+import { gapAhead, stallStep } from './stall'
 import { PlayOnButton } from '@wms/app/remote/PlayOnButton'
 
 haveHls(Hls)
@@ -356,11 +357,8 @@ export default function DvdPlayer({ item, mode, ttn, chapter, startAt, insert, m
     return () => { v.removeEventListener('ended', clipEnded); v.removeEventListener('timeupdate', onTime) }
   }, [pres, showButtons, pressButton, clipEnded])
 
-  // Stall watchdog. Browsers do not always fire "ended" for HLS streams whose
-  // last segment ends a little short of the announced length (the warning
-  // screens at the start of many discs), which used to leave the player
-  // stuck. Playback that stops moving near the end counts as ended; a stall
-  // in the middle gets nudged past the gap.
+  // Stall watchdog (stall.ts): playback that stops moving near the end counts as ended, and a
+  // stall in front of a gap in what is buffered is moved past it. A seek still loading is left be.
   useEffect(() => {
     if (pres?.media?.type !== 'hls' || pres.media.loop) return
     let last = -1, still = 0
@@ -370,14 +368,16 @@ export default function DvdPlayer({ item, mode, ttn, chapter, startAt, insert, m
       if (Math.abs(v.currentTime - last) > 0.05) { last = v.currentTime; still = 0; return }
       still++
       const end = pres.kind === 'title' ? (pres.title?.durationSec || v.duration) : (isFinite(v.duration) && v.duration > 0 ? v.duration : pres.media!.durationSec)
-      if (still >= 3 && end > 0 && v.currentTime >= end - 2.5) { still = 0; clipEnded() }
-      else if (still >= 8) {
+      const step = stallStep(still, v.currentTime, end, v.seeking, v.buffered)
+      if (step === 'ended') { still = 0; clipEnded() }
+      else if (step === 'nudge') {
         still = 0
-        try { v.currentTime = v.currentTime + 0.5; hls.current?.startLoad() } catch { /* ignore */ }
+        const to = gapAhead(v.buffered, v.currentTime)
+        try { if (to != null) v.currentTime = to + 0.05 } catch { /* ignore */ }
       }
     }, 1000)
     return () => clearInterval(t)
-  }, [pres, clipEnded, hls])
+  }, [pres, clipEnded])
 
   // Forced action on still menus (no timeupdate there).
   useEffect(() => {

@@ -9,7 +9,7 @@
   "main": "./web/index.ts",
   "scripts": {
     "build:bundle": "node ${WITTYMODULE:-../WittyModule}/kit/web/build-bundle.mjs .",
-    "test": "node scripts/test-web.mjs"
+    "test": "node scripts/test-web.mjs && node --test web/app/stall.test.mjs"
   },
   "repository": "github:wittywilla/WittyDisc",
   "dependencies": {
