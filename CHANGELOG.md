@@ -6,6 +6,7 @@ What changed in WittyDisc, newest first. What changed before it had a repository
 ## 0.3.4
 
 - The README's pictures are retaken from WittyMediaServer 0.8.0-alpha.
+- Seeking on a Blu-ray no longer stalls and skips: the stall watchdog dropped a seek still loading after 8 seconds, asked for it again and moved on half a second. It now waits for a seek however long it takes, and only steps over a real gap in what is buffered (#14).
 
 ## 0.3.3
 
