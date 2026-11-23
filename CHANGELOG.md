@@ -3,6 +3,10 @@
 What changed in WittyDisc, newest first. What changed before it had a repository of its own is in the
 [WittyMediaServer changelog](https://github.com/wittywilla/WittyMediaServer/blob/master/CHANGELOG.md).
 
+## 0.3.6
+
+- **Updated dependencies:** react-router-dom from 7.18.5 to 7.18.6; actions/setup-go from 7.0.0 to 7.1.0; esbuild from 0.27.7 to 0.28.2.
+
 ## 0.3.5
 
 - **Back on any TV remote** closes a disc's pop-up menu or leaves the player. Some remotes' Back button did nothing.
