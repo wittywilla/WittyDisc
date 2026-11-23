@@ -23,6 +23,9 @@ import { discPath } from './paths'
 import { gapAhead, stallStep } from './stall'
 import { PlayOnButton } from '@wms/app/remote/PlayOnButton'
 
+// TV mode (the server marks it on <html>) names the remote's buttons, never a computer's keys: TV-MODE.md.
+const onTv = () => document.documentElement.classList.contains('tv-mode')
+
 haveHls(Hls)
 
 type Props = {
@@ -653,7 +656,7 @@ export default function DvdPlayer({ item, mode, ttn, chapter, startAt, insert, m
         case 'f': toggleFullscreen(root.current); break
         case 'a': onRemote('audio'); break
         case 's': onRemote('subtitle'); break
-        case 'Escape': case 'GoBack': case 'BrowserBack': if (popupOpen) { e.preventDefault(); setPopupOpen(false) } else if (!document.fullscreenElement) { e.preventDefault(); back() } break
+        case 'Escape': case 'GoBack': case 'BrowserBack': case 'Back': case 'XF86Back': if (popupOpen) { e.preventDefault(); setPopupOpen(false) } else if (!document.fullscreenElement) { e.preventDefault(); back() } break
         case 'PageDown': case 'n': case 'MediaTrackNext': onRemote('next'); break
         case 'PageUp': case 'p': case 'MediaTrackPrevious': onRemote('prev'); break
         case 'MediaStop': onRemote('stop'); break
@@ -779,7 +782,7 @@ export default function DvdPlayer({ item, mode, ttn, chapter, startAt, insert, m
             <button className="ibtn" onClick={back} title="Back (playback continues in the mini player)"><IconBack /></button>
             <div className="grow">
               <h1>{item.title}</h1>
-              <div className="sub">{pres?.kind === 'title' ? `${titleName} · ${chapters.length} scenes${hasPopup ? (popupOpen ? ' · pop-up menu (Esc closes)' : ' · Menu key: pop-up menu') : ''}` : pres?.kind === 'menu' ? (menu?.inTitle && buttons.length ? 'Interactive feature' : menu?.inTitle ? '' : `${discName(item)} menu`) : ''}</div>
+              <div className="sub">{pres?.kind === 'title' ? `${titleName} · ${chapters.length} scenes${hasPopup ? (popupOpen ? (onTv() ? ' · pop-up menu (Back closes)' : ' · pop-up menu (Esc closes)') : (onTv() ? ' · Menu button: pop-up menu' : ' · Menu key: pop-up menu')) : ''}` : pres?.kind === 'menu' ? (menu?.inTitle && buttons.length ? 'Interactive feature' : menu?.inTitle ? '' : `${discName(item)} menu`) : ''}</div>
             </div>
             {stereoWords && (
               <span className="stereo-chip" role="group" aria-label={`3D on: ${stereoWords}`}>

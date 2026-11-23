@@ -3,6 +3,15 @@
 What changed in WittyDisc, newest first. What changed before it had a repository of its own is in the
 [WittyMediaServer changelog](https://github.com/wittywilla/WittyMediaServer/blob/master/CHANGELOG.md).
 
+## 0.3.5
+
+- **Back on any TV remote** closes a disc's pop-up menu or leaves the player. Some remotes' Back button did nothing.
+- **On a television,** the title line says "Back closes" and "Menu button" for the pop-up menu, instead of Esc and "Menu key".
+
+## Developer notes for 0.3.5
+
+- `DvdPlayer.tsx`: Back is also `Back` and `XF86Back`; `onTv()` (the server's `html.tv-mode`) picks the remote's words (docs/TV-MODE.md).
+
 ## 0.3.4
 
 - **Fixed: seeking on a Blu-ray** no longer stalls and skips ahead. A seek now waits however long the disc takes, and only steps over a real gap.
