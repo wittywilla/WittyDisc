@@ -78,6 +78,8 @@ npm run build:bundle
 | `ReadFile(path, max)` | A whole file, with a size cap |
 | `Reader(file)` | An `io.ReaderAt` over a file's ranges |
 
+**Working on a Mac?** Start with WittyMediaServer's [MAC-START-HERE.md](https://github.com/wittywilla/WittyMediaServer/blob/v0.8.1-alpha/MAC-START-HERE.md): what to install, what to clone, and every Mac task in order: this module's is item 7.1 (wittywilla/WittyMediaServer#571).
+
 ## Licence
 
 GNU Affero General Public License v3.0 (or later): see [LICENSE](LICENSE) and [NOTICE](NOTICE). If you redistribute it or build on it, please keep the NOTICE attribution.
